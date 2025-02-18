@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator()
 export const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Screen2">
+      <Stack.Navigator initialRouteName="Screen1">
         <Stack.Screen name="Screen1" component={Screen1} />
         <Stack.Screen name="Screen2" component={Screen2} />
       </Stack.Navigator>
@@ -36,5 +36,3 @@ const styles = StyleSheet.create({
 });
 
 export default App;
-
-skibidi
