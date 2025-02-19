@@ -1,47 +1,35 @@
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button, Image } from "react-native";
+import { StyleSheet, Text, View, Button } from "react-native";
 
-export const MainMenu = ({ navigation }) => {
+export const Screen31 = () => {
   // ---------------- Initialisations ----------------
   // ---------------- State ----------------
   // ---------------- Handlers ----------------
   // ---------------- View ----------------
   return (
-    <View style={styles.container}>
-        <Image
-          source={require('../../../assets/piano.jpg')}
-          style={{ width: 250, height: 250, resizeMode: 'contain', alignSelf: 'center', marginTop: 50 }}
-        />
       <View
         style={{
           flex: 1,
           backgroundColor: "white",
           padding: 80,
           justifyContent: "center",
+          alignSelf: "center",
           gap: 20,
           width: 500,
         }}
       >
         <Button
-          title="test"
+          title="LIGHT"
           onPress={() => navigation.navigate('Screen1')}
           color="black"
         />
         <StatusBar style="auto" />
         <Button
-          title="Press"
+          title="DARK"
           onPress={() => navigation.navigate('Screen2')}
           color="black"
         />
         <StatusBar style="auto" />
-        <Button
-          title="SETTINGS"
-          onPress={() => navigation.navigate('Screen3')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-      </View>
-      <StatusBar style="auto" />
     </View>
   );
 };
@@ -52,7 +40,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
+    padding: 20,
   },
 });
 
-export default MainMenu;
+export default Screen31;

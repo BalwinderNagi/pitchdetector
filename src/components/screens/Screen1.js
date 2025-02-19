@@ -1,18 +1,20 @@
 import { StatusBar } from 'expo-status-bar';
+import React, { useContext } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { ThemeContext } from '../layout/ThemeContext';
 
 export const Screen1 = () => {
-  // ---------------- Initialisations ----------------
-  // ---------------- State ----------------
-  // ---------------- Handlers ----------------
-  // ---------------- View ----------------
+  const { currentTheme, toggleTheme, isDarkMode } = useContext(ThemeContext);
+
   return (
-    <View style={styles.container}>
-      <Text>TEST SCREEN 1</Text>
-      <StatusBar style="auto" />
+    <View>
+      <Text style={{ color: currentTheme.textColor }}>
+        This screen is {isDarkMode ? 'Dark' : 'Light'}
+      </Text>
+      <Button title="Toggle Theme" onPress={toggleTheme} />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
