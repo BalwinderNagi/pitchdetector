@@ -7,11 +7,13 @@ import Screen2 from "./src/components/screens/Screen2";
 import Screen3 from "./src/components/screens/Screen3";
 import Screen31 from "./src/components/screens/Screen31";
 import MainMenu from "./src/components/screens/MainMenu";
+import ThemeProvider from "./src/components/layout/ThemeContext";
 
 const Stack = createNativeStackNavigator();
 
 export const App = () => {
   return (
+    <ThemeProvider>
     <NavigationContainer>
       <Stack.Navigator initialRouteName="MainMenu">
         <Stack.Screen name="Screen1" component={Screen1} />
@@ -29,6 +31,7 @@ export const App = () => {
         />
       </Stack.Navigator>
     </NavigationContainer>
+    </ThemeProvider>
   );
 };
 
