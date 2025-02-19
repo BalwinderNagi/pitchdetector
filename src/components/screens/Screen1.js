@@ -8,7 +8,7 @@ export const Screen1 = () => {
   // ---------------- View ----------------
   return (
     <View style={styles.container}>
-      <Text>Screen 1</Text>
+      <Text>TEST SCREEN 1</Text>
       <StatusBar style="auto" />
     </View>
   );
