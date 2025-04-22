@@ -1,58 +1,60 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button, Image } from "react-native";
+// src/components/screens/MainMenu.js
+import React, { useContext } from 'react'
+import { View, Image, StyleSheet, Pressable, Text } from 'react-native'
+import Theme from '../layout/Theme'
+import { ThemeContext } from '../layout/ThemeContext'
 
 export const MainMenu = ({ navigation }) => {
-  // ---------------- Initialisations ----------------
-  // ---------------- State ----------------
-  // ---------------- Handlers ----------------
-  // ---------------- View ----------------
+  const { currentTheme } = useContext(ThemeContext)
+
   return (
-    <View style={styles.container}>
-        <Image
-          source={require('../../../assets/piano.jpg')}
-          style={{ width: 250, height: 250, resizeMode: 'contain', alignSelf: 'center', marginTop: 50 }}
-        />
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "white",
-          padding: 80,
-          justifyContent: "center",
-          gap: 20,
-          width: 500,
-        }}
-      >
-        <Button
-          title="test"
-          onPress={() => navigation.navigate('Screen1')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-        <Button
-          title="Press"
-          onPress={() => navigation.navigate('Screen2')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-        <Button
-          title="SETTINGS"
-          onPress={() => navigation.navigate('Screen3')}
-          color="black"
-        />
-        <StatusBar style="auto" />
+    <Theme>
+      <Image
+        source={require('../../../assets/piano.jpg')}
+        style={styles.image}
+      />
+      <View style={styles.buttonsContainer}>
+        {[
+          { title: 'TEST',   to: 'Screen1' },
+          { title: 'PRESS',  to: 'Screen2' },
+          { title: 'SETTINGS', to: 'Screen3' },
+        ].map(({title,to}) => (
+          <Pressable
+            key={to}
+            style={[styles.btn, { backgroundColor: currentTheme.textColor }]}
+            onPress={() => navigation.navigate(to)}
+          >
+            <Text style={[styles.btnText, { color: currentTheme.backgroundColor }]}>
+              {title}
+            </Text>
+          </Pressable>
+        ))}
       </View>
-      <StatusBar style="auto" />
-    </View>
-  );
-};
+    </Theme>
+  )
+}
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
+  image: {
+    width: 250, height: 250, resizeMode: 'contain',
+    alignSelf: 'center', marginTop: 50
   },
-});
+  buttonsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 16,
+    width: '80%',
+    alignSelf: 'center'
+  },
+  btn: {
+    paddingVertical: 14,
+    borderRadius: 6,
+    alignItems: 'center'
+  },
+  btnText: {
+    fontSize: 16,
+    fontWeight: '600'
+  }
+})
 
-export default MainMenu;
+export default MainMenu

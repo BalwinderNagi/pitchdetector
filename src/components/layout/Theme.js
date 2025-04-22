@@ -1,25 +1,20 @@
-import React, { useContext } from 'react';
-import { StatusBar, StyleSheet, View } from 'react-native';
-import { ThemeContext } from '../../ThemeContext'; // Adjust path as needed
+// src/components/layout/Theme.js
+import React, { useContext } from 'react'
+import { View, StatusBar, StyleSheet } from 'react-native'
+import { ThemeContext } from './ThemeContext'
 
 const Theme = ({ children }) => {
-  // Pull the active theme from context
-  const { currentTheme } = useContext(ThemeContext);
-
+  const { currentTheme, isDarkMode } = useContext(ThemeContext)
   return (
     <View style={[styles.screen, { backgroundColor: currentTheme.backgroundColor }]}>
       {children}
-      <StatusBar style="light" />
+      <StatusBar style={isDarkMode ? 'light' : 'dark'} />
     </View>
-  );
-};
+  )
+}
 
 const styles = StyleSheet.create({
-  screen: {
-    flex: 1,
-    padding: 15,
-    // You can omit a backgroundColor here if you set it from currentTheme
-  },
-});
+  screen: { flex: 1, padding: 15 }
+})
 
-export default Theme;
+export default Theme

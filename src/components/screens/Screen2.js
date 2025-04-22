@@ -1,26 +1,16 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View } from "react-native";
+// src/components/screens/Screen2.js
+import React, { useContext } from 'react'
+import { Text } from 'react-native'
+import Theme from '../layout/Theme'
+import { ThemeContext } from '../layout/ThemeContext'
 
 export const Screen2 = () => {
-  // ---------------- Initialisations ----------------
-  // ---------------- State ----------------
-  // ---------------- Handlers ----------------
-  // ---------------- View ----------------
+  const { currentTheme } = useContext(ThemeContext)
   return (
-    <View style={styles.container}>
-      <Text>TEST SCREEN 2</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
-};
+    <Theme>
+      <Text style={{ color: currentTheme.textColor }}>TEST SCREEN 2</Text>
+    </Theme>
+  )
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
-
-export default Screen2;
+export default Screen2

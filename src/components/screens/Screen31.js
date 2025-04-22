@@ -1,47 +1,54 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button } from "react-native";
+// src/components/screens/Screen31.js
+import React, { useContext } from 'react'
+import { View, StyleSheet, Pressable, Text } from 'react-native'
+import Theme from '../layout/Theme'
+import { ThemeContext } from '../layout/ThemeContext'
 
 export const Screen31 = () => {
-  // ---------------- Initialisations ----------------
-  // ---------------- State ----------------
-  // ---------------- Handlers ----------------
-  // ---------------- View ----------------
+  const { isDarkMode, toggleTheme, currentTheme } = useContext(ThemeContext)
+
   return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "white",
-          padding: 80,
-          justifyContent: "center",
-          alignSelf: "center",
-          gap: 20,
-          width: 500,
-        }}
-      >
-        <Button
-          title="LIGHT"
-          onPress={() => navigation.navigate('Screen1')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-        <Button
-          title="DARK"
-          onPress={() => navigation.navigate('Screen2')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-    </View>
-  );
-};
+    <Theme>
+      <View style={styles.container}>
+        <Pressable
+          style={[styles.btn, { backgroundColor: currentTheme.textColor }]}
+          onPress={() => isDarkMode && toggleTheme()}
+        >
+          <Text style={[styles.btnText, { color: currentTheme.backgroundColor }]}>
+            LIGHT
+          </Text>
+        </Pressable>
+
+        <Pressable
+          style={[styles.btn, { backgroundColor: currentTheme.textColor }]}
+          onPress={() => !isDarkMode && toggleTheme()}
+        >
+          <Text style={[styles.btnText, { color: currentTheme.backgroundColor }]}>
+            DARK
+          </Text>
+        </Pressable>
+      </View>
+    </Theme>
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+    justifyContent: 'center',
+    gap: 16,
+    width: '60%',
+    alignSelf: 'center'
   },
-});
+  btn: {
+    paddingVertical: 14,
+    borderRadius: 6,
+    alignItems: 'center'
+  },
+  btnText: {
+    fontSize: 16,
+    fontWeight: '600'
+  }
+})
 
-export default Screen31;
+export default Screen31

@@ -1,62 +1,52 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button } from "react-native";
+// src/components/screens/Screen3.js
+import React, { useContext } from 'react'
+import { View, StyleSheet, Pressable, Text } from 'react-native'
+import Theme from '../layout/Theme'
+import { ThemeContext } from '../layout/ThemeContext'
 
-export const Screen3 = ({navigation}) => {
-  // ---------------- Initialisations ----------------
-  // ---------------- State ----------------
-  // ---------------- Handlers ----------------
-  // ---------------- View ----------------
+export const Screen3 = ({ navigation }) => {
+  const { currentTheme } = useContext(ThemeContext)
+
   return (
-    <View style={styles.container}>
-      {/* PRO MODE row */}
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "white",
-          padding: 80,
-          justifyContent: "center",
-          gap: 20,
-          width: 500,
-        }}
-      >
-        <Button
-          title="LIGHT/DARK MODE"
-          onPress={() => navigation.navigate('Screen31')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-        <Button
-          title="Press"
-          onPress={() => navigation.navigate('Screen2')}
-          color="black"
-        />
-        <StatusBar style="auto" />
-        <Button
-          title="SETTINGS"
-          onPress={() => navigation.navigate('Screen3')}
-          color="black"
-        />
-        <StatusBar style="auto" />
+    <Theme>
+      <View style={styles.container}>
+        {[
+          { title: 'LIGHT/DARK MODE', to: 'Screen31' },
+          { title: 'PRESS',          to: 'Screen2'   },
+          { title: 'SETTINGS',       to: 'Screen3'   },
+        ].map(({title,to}) => (
+          <Pressable
+            key={to}
+            style={[styles.btn, { backgroundColor: currentTheme.textColor }]}
+            onPress={() => navigation.navigate(to)}
+          >
+            <Text style={[styles.btnText, { color: currentTheme.backgroundColor }]}>
+              {title}
+            </Text>
+          </Pressable>
+        ))}
       </View>
-      <StatusBar style="auto" />
-    </View>
-  );
-};
+    </Theme>
+  )
+}
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-    padding: 20,
+    justifyContent: 'center',
+    gap: 16,
+    width: '80%',
+    alignSelf: 'center'
   },
-  row: {
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center',
-    marginBottom: 20, 
+  btn: {
+    paddingVertical: 14,
+    borderRadius: 6,
+    alignItems: 'center'
   },
-});
+  btnText: {
+    fontSize: 16,
+    fontWeight: '600'
+  }
+})
 
-export default Screen3;
+export default Screen3
