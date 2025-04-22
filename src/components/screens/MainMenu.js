@@ -15,7 +15,7 @@ export const MainMenu = ({ navigation }) => {
       />
       <View style={styles.buttonsContainer}>
         {[
-          { title: 'TEST',   to: 'Screen1' },
+          { title: 'TUNER',   to: 'Screen1' },
           { title: 'PRESS',  to: 'Screen2' },
           { title: 'SETTINGS', to: 'Screen3' },
         ].map(({title,to}) => (

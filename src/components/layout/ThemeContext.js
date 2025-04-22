@@ -5,7 +5,6 @@ export const ThemeContext = createContext();
 function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
 
-  // Two example “theme objects”:
   const lightTheme = {
     backgroundColor: '#fff',
     textColor: '#000',

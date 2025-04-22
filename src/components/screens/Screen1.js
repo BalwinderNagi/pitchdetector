@@ -5,100 +5,91 @@ import { Audio } from 'expo-av'
 import Theme from '../layout/Theme'
 import { ThemeContext } from '../layout/ThemeContext'
 
-// 13-key layout (C to C) with unique IDs
-const keys = [
-  { note: 'C',  id: 'C4' },
-  { note: 'C#', id: 'Csharp4' },
-  { note: 'D',  id: 'D4' },
-  { note: 'D#', id: 'Dsharp4' },
-  { note: 'E',  id: 'E4' },
-  { note: 'F',  id: 'F4' },
-  { note: 'F#', id: 'Fsharp4' },
-  { note: 'G',  id: 'G4' },
-  { note: 'G#', id: 'Gsharp4' },
-  { note: 'A',  id: 'A4' },
-  { note: 'A#', id: 'Asharp4' },
-  { note: 'B',  id: 'B4' },
-  { note: 'C',  id: 'C5' }
-]
+// 13-key layout
+const keys = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B','C']
 
 export const Screen1 = () => {
   const { currentTheme, isDarkMode } = useContext(ThemeContext)
   const [count, setCount] = useState(1)
   const [bpm, setBpm] = useState(100)
-  const [metroOn, setMetroOn] = useState(true)
+  const [metroOn, setMetroOn] = useState(false)
   const intervalRef = useRef(null)
-  const soundRef = useRef(new Audio.Sound())
+  const soundRef = useRef(null)
 
-  // Load click sound once
+  // Load click sound on mount
   useEffect(() => {
-    ;(async () => {
+    (async () => {
       try {
-        await soundRef.current.loadAsync(require('../../../../assets/click.wav'))
-      } catch {};
+        const { sound } = await Audio.Sound.createAsync(
+          require('../../../assets/click.wav')
+        )
+        soundRef.current = sound
+      } catch (e) {
+        console.warn('Audio load error:', e)
+      }
     })()
     return () => {
       clearInterval(intervalRef.current)
-      soundRef.current.unloadAsync()
+      soundRef.current?.unloadAsync()
     }
   }, [])
 
-  // Manage metronome interval
+  // Metronome tick
   useEffect(() => {
     clearInterval(intervalRef.current)
+    const tick = () => {
+      const s = soundRef.current
+      if (!s) return
+      s.setPositionAsync(0)
+        .then(() => s.playAsync())
+        .catch(e => console.warn('Play error:', e))
+    }
     if (metroOn) {
-      intervalRef.current = setInterval(async () => {
-        try { await soundRef.current.replayAsync() } catch {}
-      }, 60000 / bpm)
+      tick() // immediate tick
+      intervalRef.current = setInterval(tick, Math.round(60000 / bpm))
     }
     return () => clearInterval(intervalRef.current)
-  }, [bpm, metroOn])
+  }, [metroOn, bpm])
 
   // Keyboard layout
-  const whiteKeys = keys.filter(k => !k.note.includes('#'))
-  const blackKeys = keys.filter(k => k.note.includes('#'))
-  const SCREEN_WIDTH = Dimensions.get('window').width
-  const keyWidth = SCREEN_WIDTH / whiteKeys.length
+  const whiteKeys = keys.filter(k => !k.includes('#'))
+  const blackKeys = keys.filter(k => k.includes('#'))
+  const screenWidth = Dimensions.get('window').width
+  const keyWidth = screenWidth / whiteKeys.length
 
-  // Inverted colors in dark mode
-  const whiteKeyBG = isDarkMode ? '#000' : '#fff'
-  const whiteKeyBorder = isDarkMode ? '#fff' : '#000'
-  const blackKeyBG = isDarkMode ? '#fff' : '#000'
+  // Colors
+  const whiteBG = isDarkMode ? '#000' : '#fff'
+  const whiteBorder = isDarkMode ? '#fff' : '#000'
+  const blackBG = isDarkMode ? '#fff' : '#000'
 
   return (
     <Theme>
-      {/* Piano keyboard */}
+      {/* Keyboard */}
       <View style={styles.keyboardContainer}>
-        {whiteKeys.map(({note,id}) => (
+        {whiteKeys.map((note, i) => (
           <Pressable
-            key={id}
+            key={note + i}
             onPress={() => console.log(`You pressed ${note}`)}
             style={[
               styles.whiteKey,
-              {
-                width: keyWidth,
-                backgroundColor: whiteKeyBG,
-                borderColor: whiteKeyBorder
-              }
+              { width: keyWidth, backgroundColor: whiteBG, borderColor: whiteBorder }
             ]}
           >
-            <Text style={[styles.whiteLabel, { color: currentTheme.textColor }]}>  
-              {note}
-            </Text>
+            <Text style={[styles.whiteLabel, { color: currentTheme.textColor }]}> {note} </Text>
           </Pressable>
         ))}
-        {blackKeys.map(({note,id}) => {
-          const whiteIndex = whiteKeys.findIndex(w => w.note === note.replace('#',''))
+        {blackKeys.map((note, idx) => {
+          const pos = whiteKeys.indexOf(note.replace('#',''))
           return (
             <Pressable
-              key={id}
+              key={note + idx}
               onPress={() => console.log(`You pressed ${note}`)}
               style={[
                 styles.blackKey,
                 {
-                  left: keyWidth * (whiteIndex + 1) - keyWidth * 0.25,
+                  left: keyWidth * (pos + 1) - keyWidth * 0.25,
                   width: keyWidth * 0.5,
-                  backgroundColor: blackKeyBG
+                  backgroundColor: blackBG
                 }
               ]}
             />
@@ -106,57 +97,32 @@ export const Screen1 = () => {
         })}
       </View>
 
-      {/* Controls: Counter and Metronome */}
+      {/* Counter & Metronome Controls */}
       <View style={styles.controlsContainer}>
-        {/* Counter */}
         <View style={styles.control}>
-          <Pressable
-            style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}
-            onPress={() => setCount(c => Math.max(1, c - 1))}
-          >
-            <Text style={[styles.ctrlText, { color: currentTheme.backgroundColor }]}>
-              -
-            </Text>
+          <Pressable onPress={() => setCount(c => Math.max(1, c - 1))} style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}>  
+            <Text style={[styles.ctrlText, { color: currentTheme.backgroundColor }]}>-</Text>
           </Pressable>
-          <Text style={[styles.ctrlValue, { color: currentTheme.textColor }]}>  
-            {count}
-          </Text>
-          <Pressable
-            style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}
-            onPress={() => setCount(c => c + 1)}
-          >
-            <Text style={[styles.ctrlText, { color: currentTheme.backgroundColor }]}>
-              +
-            </Text>
+          <Text style={[styles.ctrlValue, { color: currentTheme.textColor }]}>{count}</Text>
+          <Pressable onPress={() => setCount(c => c + 1)} style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}>  
+            <Text style={[styles.ctrlText, { color: currentTheme.backgroundColor }]}>+</Text>
           </Pressable>
         </View>
 
-        {/* Metronome */}
         <View style={styles.control}>
-          <Pressable
-            style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}
-            onPress={() => setBpm(b => Math.max(5, b - 5))}
-          >
+          <Pressable onPress={() => setBpm(b => Math.max(5, b - 5))} style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}>  
             <Text style={[styles.ctrlText, { color: currentTheme.backgroundColor }]}>-</Text>
           </Pressable>
-          <Text style={[styles.ctrlValue, { color: currentTheme.textColor }]}>  
-            {bpm} BPM
-          </Text>
-          <Pressable
-            style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}
-            onPress={() => setBpm(b => b + 5)}
-          >
+          <Text style={[styles.ctrlValue, { color: currentTheme.textColor }]}>{bpm} BPM</Text>
+          <Pressable onPress={() => setBpm(b => b + 5)} style={[styles.ctrlBtn, { backgroundColor: currentTheme.textColor }]}>  
             <Text style={[styles.ctrlText, { color: currentTheme.backgroundColor }]}>+</Text>
           </Pressable>
         </View>
       </View>
 
-      {/* Toggle Metronome Button */}
-      <Pressable
-        style={[styles.toggleBtn, { backgroundColor: currentTheme.textColor }]}
-        onPress={() => setMetroOn(on => !on)}
-      >
-        <Text style={[styles.toggleText, { color: currentTheme.backgroundColor }]}>  
+      {/* Toggle Metronome */}
+      <Pressable onPress={() => setMetroOn(on => !on)} style={[styles.toggleBtn, { backgroundColor: currentTheme.textColor }]}>  
+        <Text style={[styles.toggleText, { color: currentTheme.backgroundColor }]}>
           {metroOn ? 'Stop Metronome' : 'Start Metronome'}
         </Text>
       </Pressable>
@@ -167,52 +133,15 @@ export const Screen1 = () => {
 export default Screen1
 
 const styles = StyleSheet.create({
-  keyboardContainer: {
-    flexDirection: 'row',
-    position: 'relative',
-    height: 200,
-    width: '100%',
-    alignSelf: 'center'
-  },
-  whiteKey: {
-    borderWidth: 1,
-    height: '100%',
-    justifyContent: 'flex-end'
-  },
-  blackKey: {
-    position: 'absolute',
-    height: '60%',
-    borderRadius: 3,
-    zIndex: 1
-  },
-  whiteLabel: {
-    alignSelf: 'center',
-    marginBottom: 8,
-    fontSize: 12
-  },
-  controlsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    padding: 20
-  },
-  control: {
-    flexDirection: 'row',
-    alignItems: 'center'
-  },
-  ctrlBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center'
-  },
-  ctrlText: {
-    fontSize: 24,
-    fontWeight: '600'
-  },
-  ctrlValue: {
-    marginHorizontal: 12,
-    fontSize: 16,
-    fontWeight: '500'
-  }
+  keyboardContainer: { flexDirection: 'row', position: 'relative', height: 200, width: '100%', alignSelf: 'center' },
+  whiteKey: { borderWidth: 1, height: '100%', justifyContent: 'flex-end' },
+  blackKey: { position: 'absolute', height: '60%', borderRadius: 3, zIndex: 1 },
+  whiteLabel: { alignSelf: 'center', marginBottom: 8, fontSize: 12 },
+  controlsContainer: { flexDirection: 'row', justifyContent: 'space-around', padding: 20 },
+  control: { flexDirection: 'row', alignItems: 'center' },
+  ctrlBtn: { width: 40, height: 40, borderRadius: 20, justifyContent: 'center', alignItems: 'center' },
+  ctrlText: { fontSize: 24, fontWeight: '600' },
+  ctrlValue: { marginHorizontal: 12, fontSize: 16, fontWeight: '500' },
+  toggleBtn: { alignSelf: 'center', padding: 12, borderRadius: 6, marginTop: 10 },
+  toggleText: { fontSize: 16, fontWeight: '600' }
 })
