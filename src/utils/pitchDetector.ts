@@ -15,12 +15,18 @@ export async function initPitchModel() {
 
   await tf.ready();
 
-  // Load the asset
-  const asset = Asset.fromModule(modelAsset);
-  await asset.downloadAsync();
+  try {
+    const asset = Asset.fromModule(modelAsset);
+    await asset.downloadAsync();
 
-  // Allocate the interpreter (adjust this if you have a specific loading method)
-  interpreter = await tf.loadGraphModel(asset.localUri!);
+    console.log('Loaded asset URI:', asset.localUri);
+
+    interpreter = await tf.loadGraphModel(asset.localUri!);
+
+    console.log('Interpreter loaded successfully');
+  } catch (err) {
+    console.error('Failed to load model:', err);
+  }
 }
 
 // 2) Base64 → Uint8Array PCM → Float32Array audio samples

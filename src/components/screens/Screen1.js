@@ -6,6 +6,7 @@ import * as FileSystem from 'expo-file-system'
 import Theme from '../layout/Theme'
 import { ThemeContext } from '../layout/ThemeContext'
 import PitchGauge from '../layout/PitchGauge'            // ← new
+import clickSound from '../../../assets/click.wav'
 
 // 12-key layout (no duplicate 'C')
 const enumKeys = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
@@ -27,7 +28,7 @@ export const Screen1 = () => {
   // (1) load click sound
   useEffect(() => {
     ;(async () => {
-      const { sound } = await Audio.Sound.createAsync(require('../../../assets/click.wav'))
+      const { sound } = await Audio.Sound.createAsync((clickSound))
       soundRef.current = sound
     })()
     return () => {

@@ -1,8 +1,12 @@
-// metro.config.js
 const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(__dirname);
+module.exports = (async () => {
+  const config = await getDefaultConfig(__dirname);
+  const { assetExts } = config.resolver;
 
-config.resolver.assetExts.push('tflite');
-
-module.exports = config;
+  return {
+    resolver: {
+      assetExts: Array.from(new Set([...assetExts, 'bin', 'tflite'])), // remove duplicates
+    },
+  };
+})();

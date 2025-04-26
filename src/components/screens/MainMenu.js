@@ -3,6 +3,7 @@ import React, { useContext } from 'react'
 import { View, Image, StyleSheet, Pressable, Text } from 'react-native'
 import Theme from '../layout/Theme'
 import { ThemeContext } from '../layout/ThemeContext'
+import pianoImage from '../../../assets/piano.jpg'
 
 export const MainMenu = ({ navigation }) => {
   const { currentTheme } = useContext(ThemeContext)
@@ -10,7 +11,7 @@ export const MainMenu = ({ navigation }) => {
   return (
     <Theme>
       <Image
-        source={require('../../../assets/piano.jpg')}
+        source={pianoImage}
         style={styles.image}
       />
       <View style={styles.buttonsContainer}>
