@@ -1,29 +1,35 @@
-import React, { createContext, useState, useContext } from 'react';
+// src/components/layout/ThemeContext.js
+import React, { createContext, useState } from 'react';
 
 export const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const [proMode, setProMode]       = useState(false);
+  const [proMode,    setProMode]    = useState(false);
 
-  const lightTheme = {
-    backgroundColor: '#fff',
-    textColor: '#000',
-  };
-
-  const darkTheme = {
-    backgroundColor: '#000',
-    textColor: '#fff',
-  };
+  const lightTheme = { backgroundColor: '#fff', textColor: '#000' };
+  const darkTheme  = { backgroundColor: '#000', textColor: '#fff' };
 
   const currentTheme = isDarkMode ? darkTheme : lightTheme;
 
   function toggleTheme() {
-    setIsDarkMode(!isDarkMode);
+    setIsDarkMode(d => !d);
+  }
+
+  function toggleProMode() {
+    setProMode(p => !p);
   }
 
   return (
-    <ThemeContext.Provider value={{ currentTheme, toggleTheme, isDarkMode, }}>
+    <ThemeContext.Provider
+      value={{
+        currentTheme,
+        isDarkMode,
+        toggleTheme,
+        proMode,
+        toggleProMode        // ← don’t forget this
+      }}
+    >
       {children}
     </ThemeContext.Provider>
   );
