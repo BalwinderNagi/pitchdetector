@@ -1,34 +1,30 @@
-// src/components/screens/Screen1.js
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import { View, Pressable, Text, StyleSheet, Dimensions, Alert } from 'react-native'
 import { Audio } from 'expo-av'
 import * as FileSystem from 'expo-file-system'
 import Theme from '../layout/Theme'
 import { ThemeContext } from '../layout/ThemeContext'
-import PitchGauge from '../layout/PitchGauge'            // ← new
+import PitchGauge from '../layout/PitchGauge'
 import clickSound from '../../../assets/click.wav'
 
-// 12-key layout (no duplicate 'C')
 const enumKeys = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B']
 
 export const Screen1 = () => {
   const { currentTheme, isDarkMode } = useContext(ThemeContext)
 
-  // UI state
   const [count, setCount]         = useState(1)
   const [bpm, setBpm]             = useState(100)
   const [metroOn, setMetroOn]     = useState(false)
   const [listening, setListening] = useState(false)
-  const [currentNote, setCurrentNote] = useState(null)   // ← new
+  const [currentNote, setCurrentNote] = useState(null)
 
   const intervalRef  = useRef(null)
   const soundRef     = useRef(null)
   const recordingRef = useRef(null)
 
-  // (1) load click sound
   useEffect(() => {
     ;(async () => {
-      const { sound } = await Audio.Sound.createAsync((clickSound))
+      const { sound } = await Audio.Sound.createAsync(clickSound)
       soundRef.current = sound
     })()
     return () => {
@@ -38,7 +34,6 @@ export const Screen1 = () => {
     }
   }, [])
 
-  // (2) request mic permissions
   useEffect(() => {
     ;(async () => {
       const { status } = await Audio.requestPermissionsAsync()
@@ -55,7 +50,6 @@ export const Screen1 = () => {
     })()
   }, [])
 
-  // (3) metronome
   useEffect(() => {
     clearInterval(intervalRef.current)
     const tick = () => {
@@ -70,7 +64,6 @@ export const Screen1 = () => {
     return () => clearInterval(intervalRef.current)
   }, [metroOn, bpm])
 
-  // (4) start streaming PCM ↓
   const startRecording = async () => {
     try {
       const recording = new Audio.Recording()
@@ -98,11 +91,9 @@ export const Screen1 = () => {
       recording.setOnRecordingStatusUpdate(async status => {
         if (status.isRecording) {
           const uri = recording.getURI()
-          // read raw PCM as base64
           const base64 = await FileSystem.readAsStringAsync(uri, { encoding: FileSystem.EncodingType.Base64 })
-          // TODO: decode base64→PCM buffer & run your TFLite helper
-          const [note, conf] = await predictOneAsync(base64)
-          setCurrentNote(note)    // ← update the gauge
+          const [note] = await predictOneAsync(base64)
+          setCurrentNote(note)
         }
       })
       recording.setProgressUpdateInterval(100)
@@ -131,21 +122,35 @@ export const Screen1 = () => {
   const keyWidth = screenWidth / whiteKeys.length
 
   // (6) colors
-  const whiteBG    = isDarkMode ? '#000' : '#fff'
-  const whiteBorder= isDarkMode ? '#fff' : '#000'
-  const blackBG    = isDarkMode ? '#fff' : '#000'
+  const whiteBG     = isDarkMode ? '#000' : '#fff'
+  const whiteBorder = isDarkMode ? '#fff' : '#000'
+  const blackBG     = isDarkMode ? '#fff' : '#000'
 
   return (
     <Theme>
       {/* ————— piano keys ————— */}
-      <View style={styles.keyboardContainer}>
+      <View
+        style={[
+          styles.keyboardContainer,
+          { width: keyWidth * whiteKeys.length }      // shrink-wrap to exactly the keys’ width
+        ]}
+      >
         {whiteKeys.map((note,i)=>(
           <Pressable
             key={note+i}
             onPress={()=>console.log(`Pressed ${note}`)}
-            style={[styles.whiteKey, { width:keyWidth, backgroundColor:whiteBG, borderColor:whiteBorder }]}
+            style={[
+              styles.whiteKey,
+              {
+                width: keyWidth,
+                backgroundColor: whiteBG,
+                borderColor: whiteBorder
+              }
+            ]}
           >
-            <Text style={[styles.whiteLabel, { color: currentTheme.textColor }]}>{note}</Text>
+            <Text style={[styles.whiteLabel, { color: currentTheme.textColor }]}>
+              {note}
+            </Text>
           </Pressable>
         ))}
         {blackKeys.map((note,idx)=>{
@@ -154,11 +159,14 @@ export const Screen1 = () => {
             <Pressable
               key={note+idx}
               onPress={()=>console.log(`Pressed ${note}`)}
-              style={[styles.blackKey,{
-                left: keyWidth*(pos+1)-keyWidth*0.25,
-                width:keyWidth*0.5,
-                backgroundColor:blackBG
-              }]}
+              style={[
+                styles.blackKey,
+                {
+                  left:          keyWidth * (pos+1) - keyWidth * 0.25,
+                  width:         keyWidth * 0.5,
+                  backgroundColor: blackBG
+                }
+              ]}
             />
           )
         })}
@@ -171,34 +179,60 @@ export const Screen1 = () => {
       <View style={styles.controlsContainer}>
         {/* count */}
         <View style={styles.control}>
-          <Pressable onPress={()=>setCount(c=>Math.max(1,c-1))} style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}>
+          <Pressable
+            onPress={()=>setCount(c=>Math.max(1,c-1))}
+            style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}
+          >
             <Text style={[styles.ctrlText,{color:currentTheme.backgroundColor}]}>-</Text>
           </Pressable>
-          <Text style={[styles.ctrlValue,{color:currentTheme.textColor}]}>{count}</Text>
-          <Pressable onPress={()=>setCount(c=>c+1)} style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}>
+          <Text style={[styles.ctrlValue,{color:currentTheme.textColor}]}>
+            {count}
+          </Text>
+          <Pressable
+            onPress={()=>setCount(c=>c+1)}
+            style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}
+          >
             <Text style={[styles.ctrlText,{color:currentTheme.backgroundColor}]}>+</Text>
           </Pressable>
         </View>
 
         {/* bpm */}
         <View style={styles.control}>
-          <Pressable onPress={()=>setBpm(b=>Math.max(5,b-5))} style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}>
+          <Pressable
+            onPress={()=>setBpm(b=>Math.max(5,b-5))}
+            style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}
+          >
             <Text style={[styles.ctrlText,{color:currentTheme.backgroundColor}]}>-</Text>
           </Pressable>
-          <Text style={[styles.ctrlValue,{color:currentTheme.textColor}]}>{bpm} BPM</Text>
-          <Pressable onPress={()=>setBpm(b=>b+5)} style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}>
+          <Text style={[styles.ctrlValue,{color:currentTheme.textColor}]}>
+            {bpm} BPM
+          </Text>
+          <Pressable
+            onPress={()=>setBpm(b=>b+5)}
+            style={[styles.ctrlBtn,{backgroundColor:currentTheme.textColor}]}
+          >
             <Text style={[styles.ctrlText,{color:currentTheme.backgroundColor}]}>+</Text>
           </Pressable>
         </View>
       </View>
 
       {/* ————— buttons ————— */}
-      <Pressable onPress={()=>setMetroOn(on=>!on)} style={[styles.toggleBtn,{backgroundColor:currentTheme.textColor}]}>
-        <Text style={[styles.toggleText,{color:currentTheme.backgroundColor}]}>{metroOn?'Stop Metronome':'Start Metronome'}</Text>
+      <Pressable
+        onPress={()=>setMetroOn(on=>!on)}
+        style={[styles.toggleBtn,{backgroundColor:currentTheme.textColor}]}
+      >
+        <Text style={[styles.toggleText,{color:currentTheme.backgroundColor}]}>
+          {metroOn ? 'Stop Metronome' : 'Start Metronome'}
+        </Text>
       </Pressable>
 
-      <Pressable onPress={()=>listening?stopRecording():startRecording()} style={[styles.toggleBtn,{backgroundColor:currentTheme.textColor,marginTop:6}]}>
-        <Text style={[styles.toggleText,{color:currentTheme.backgroundColor}]}>{listening?'Stop Listening':'Start Listening'}</Text>
+      <Pressable
+        onPress={()=>listening ? stopRecording() : startRecording()}
+        style={[styles.toggleBtn,{backgroundColor:currentTheme.textColor, marginTop:6}]}
+      >
+        <Text style={[styles.toggleText,{color:currentTheme.backgroundColor}]}>
+          {listening ? 'Stop Listening' : 'Start Listening'}
+        </Text>
       </Pressable>
     </Theme>
   )
@@ -207,7 +241,7 @@ export const Screen1 = () => {
 export default Screen1
 
 const styles = StyleSheet.create({
-  keyboardContainer: { flexDirection:'row', position:'relative', height:200, width:'100%', alignSelf:'center' },
+  keyboardContainer: { flexDirection:'row', position:'relative', height:200, alignSelf:'center' },
   whiteKey:          { borderWidth:1, height:'100%', justifyContent:'flex-end' },
   blackKey:          { position:'absolute', height:'60%', borderRadius:3, zIndex:1 },
   whiteLabel:        { alignSelf:'center', marginBottom:8, fontSize:12 },

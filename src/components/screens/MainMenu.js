@@ -1,4 +1,3 @@
-// src/components/screens/MainMenu.js
 import React, { useContext } from 'react'
 import { View, Image, StyleSheet, Pressable, Text } from 'react-native'
 import Theme from '../layout/Theme'
@@ -17,7 +16,7 @@ export const MainMenu = ({ navigation }) => {
       <View style={styles.buttonsContainer}>
         {[
           { title: 'TUNER',   to: 'Screen1' },
-          { title: 'PRESS',  to: 'Screen2' },
+          { title: 'TUTORIAL',  to: 'Screen2' },
           { title: 'SETTINGS', to: 'Screen3' },
         ].map(({title,to}) => (
           <Pressable

@@ -1,11 +1,8 @@
-// src/utils/pitchDetector.ts
-
 import * as tf from '@tensorflow/tfjs-react-native';
 import { Asset } from 'expo-asset';
 import { decode as atob } from 'base-64';
 import Meyda from 'meyda';
 
-// Import the tflite model statically
 import modelAsset from '../assets/pitch_detector.tflite';
 
 let interpreter: any = null;

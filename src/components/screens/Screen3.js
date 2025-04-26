@@ -12,9 +12,10 @@ export const Screen3 = ({ navigation }) => {
       <View style={styles.container}>
         {[
           { title: 'LIGHT/DARK MODE', to: 'Screen31' },
-          { title: 'PRESS',          to: 'Screen2'   },
-          { title: 'SETTINGS',       to: 'Screen3'   },
-        ].map(({title,to}) => (
+          // change CREDITS to point at the new "Credits" screen:
+          { title: 'CREDITS',          to: 'Credits'   },
+          { title: 'PRO MODE',         to: 'Screen3'   },
+        ].map(({ title, to }) => (
           <Pressable
             key={to}
             style={[styles.btn, { backgroundColor: currentTheme.textColor }]}
@@ -30,23 +31,46 @@ export const Screen3 = ({ navigation }) => {
   )
 }
 
+
+export const Credits = () => {
+  const { currentTheme } = useContext(ThemeContext)
+  return (
+    <Theme>
+      <View style={styles.creditsContainer}>
+        <Text style={[styles.creditsText, { color: currentTheme.textColor }]}>
+          A neural network pitch detection system designed by Balwinderjeet Singh Nagi.
+        </Text>
+      </View>
+    </Theme>
+  )
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     gap: 16,
     width: '80%',
-    alignSelf: 'center'
+    alignSelf: 'center',
   },
   btn: {
     paddingVertical: 14,
     borderRadius: 6,
-    alignItems: 'center'
+    alignItems: 'center',
   },
   btnText: {
     fontSize: 16,
-    fontWeight: '600'
-  }
+    fontWeight: '600',
+  },
+  creditsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  creditsText: {
+    fontSize: 18,
+    textAlign: 'center',
+  },
 })
 
 export default Screen3

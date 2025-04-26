@@ -1,4 +1,3 @@
-// src/components/layout/Theme.js
 import React, { useContext } from 'react'
 import { View, StatusBar, StyleSheet } from 'react-native'
 import { ThemeContext } from './ThemeContext'
