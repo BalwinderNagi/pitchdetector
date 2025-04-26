@@ -11,14 +11,22 @@
   "dependencies": {
     "@react-navigation/native-stack": "^7.2.0",
     "@siteed/expo-audio-stream": "^2.2.0",
+    "@tensorflow/tfjs-react-native": "^1.0.0",
     "expo": "~52.0.28",
     "expo-av": "^15.0.2",
+    "expo-gl-cpp": "^11.4.0",
     "expo-status-bar": "~2.0.1",
+    "meyda": "^5.6.3",
     "react": "18.3.1",
-    "react-native": "0.76.6"
+    "react-native": "0.76.6",
+    "react-native-svg": "^15.11.2",
+    "react-native-tflite": "^0.0.2",
+    "expo-gl": "~15.0.5"
   },
   "devDependencies": {
-    "@babel/core": "^7.20.0"
+    "@babel/core": "^7.20.0",
+    "@types/react": "~18.3.12",
+    "typescript": "^5.3.3"
   },
   "private": true
 }
