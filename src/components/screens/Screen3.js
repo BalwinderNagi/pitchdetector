@@ -12,9 +12,8 @@ export const Screen3 = ({ navigation }) => {
       <View style={styles.container}>
         {[
           { title: 'LIGHT/DARK MODE', to: 'Screen31' },
-          // change CREDITS to point at the new "Credits" screen:
           { title: 'CREDITS',          to: 'Credits'   },
-          { title: 'PRO MODE',         to: 'Screen3'   },
+          { title: 'PRO MODE',         to: 'Screen32'   },
         ].map(({ title, to }) => (
           <Pressable
             key={to}

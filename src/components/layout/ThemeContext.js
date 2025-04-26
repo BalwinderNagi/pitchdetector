@@ -4,6 +4,7 @@ export const ThemeContext = createContext();
 
 function ThemeProvider({ children }) {
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [proMode, setProMode]       = useState(false);
 
   const lightTheme = {
     backgroundColor: '#fff',
@@ -22,7 +23,7 @@ function ThemeProvider({ children }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ currentTheme, toggleTheme, isDarkMode }}>
+    <ThemeContext.Provider value={{ currentTheme, toggleTheme, isDarkMode, }}>
       {children}
     </ThemeContext.Provider>
   );
