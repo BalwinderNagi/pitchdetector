@@ -6,7 +6,7 @@ import React, { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { StatusBar } from 'expo-status-bar';
-
+import ScreenDemos from './src/components/screens/ScreenDemos';
 import ThemeProvider from './src/components/layout/ThemeContext';
 import MainMenu     from './src/components/screens/MainMenu';
 import { Credits }  from './src/components/screens/Screen3';
@@ -31,7 +31,7 @@ export default function App() {
     <ThemeProvider>
       <NavigationContainer>
         <StatusBar style="auto" />
-        <Stack.Navigator initialRouteName="MainMenu">
+        <Stack.Navigator initialRouteName="ScreenDemos">
           <Stack.Screen
             name="Screen1"
             component={Screen1}
@@ -66,6 +66,11 @@ export default function App() {
             name="Screen32"
             component={Screen32}
             options={{ title: 'Pro Mode', headerTitleAlign: 'center' }}
+          />
+          <Stack.Screen
+            name="ScreenDemos"
+            component={ScreenDemos}
+            options={{ title: 'Screen Demo', headerTitleAlign: 'center' }}
           />
         </Stack.Navigator>
       </NavigationContainer>

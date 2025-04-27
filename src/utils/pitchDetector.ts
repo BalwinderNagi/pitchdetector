@@ -1,14 +1,15 @@
 import { Asset } from 'expo-asset';
 import * as FileSystem from 'expo-file-system';
-import Tflite from 'react-native-tflite';
-import { decode as atob } from 'base-64';
 import Meyda from 'meyda';
-
+import { loadTensorflowModel, TensorflowModel } from 'react-native-fast-tflite';
+import { decode as atob } from 'base-64';
+// @ts-expect-error notypeavailable
 import modelAsset from '../assets/pitch_detector.tflite';
 
-let interpreter: Tflite | null = null;
+let model: TensorflowModel | null = null;
 
-function createMelFilterBank(options: { //  Makes a helper that builds and returns a function to convert each spectrum slice into a mel-scaled filterbank vector
+// 1) Helper: create mel filterbank manually
+function createMelFilterBank(options: {
   sampleRate: number;
   windowSize: number;
   melBands: number;
@@ -19,10 +20,10 @@ function createMelFilterBank(options: { //  Makes a helper that builds and retur
   const fftBins = windowSize / 2;
   const hzPerBin = sampleRate / windowSize;
 
-  function hzToMel(hz: number) { // Converts hz to mel scale
+  function hzToMel(hz: number) {
     return 2595 * Math.log10(1 + hz / 700);
   }
-  function melToHz(mel: number) { // Converts mel scale to hz
+  function melToHz(mel: number) {
     return 700 * (10 ** (mel / 2595) - 1);
   }
 
@@ -51,63 +52,51 @@ function createMelFilterBank(options: { //  Makes a helper that builds and retur
   };
 }
 
-
+// 2) Initialize model
 export async function initPitchModel() {
-  if (interpreter !== null) return;
-
-  interpreter = new Tflite();
+  if (model !== null) return;
 
   try {
     const asset = Asset.fromModule(modelAsset);
     await asset.downloadAsync();
     console.log('Loaded asset URI:', asset.localUri);
 
-    const modelPath = asset.localUri?.replace('file://', '');
-
-    if (!modelPath) {
+    if (!asset.localUri) {
       throw new Error('Model file path missing.');
     }
 
-    await new Promise<void>((resolve, reject) => {
-      interpreter!.loadModel(
-        {
-          model: modelPath,
-          labels: '',
-          numThreads: 1,
-        },
-        (err: any, res: any) => {
-          if (err) {
-            console.error('Failed to load model:', err);
-            reject(err);
-          } else {
-            console.log('Interpreter loaded successfully');
-            resolve();
-          }
-        }
-      );
+    // react-native-fast-tflite can load directly from file:// URLs
+    model = await loadTensorflowModel({ 
+      url: asset.localUri 
     });
+    
+    console.log('Model loaded successfully');
   } catch (err) {
     console.error('Failed to load model:', err);
   }
 }
 
-// 3) changes Base64 PCM to Float32Array
-function decodePCM(base64: string): Float32Array {
+// 3) Convert Int16Array PCM to Float32Array
+function convertPCM(pcmData: Int16Array): Float32Array {
+  const out = new Float32Array(pcmData.length);
+  for (let i = 0; i < pcmData.length; i++) {
+    out[i] = pcmData[i] / 32768; // Normalize to [-1, 1]
+  }
+  return out;
+}
+
+// 4) Decode Base64 PCM to Int16Array
+function decodePCM(base64: string): Int16Array {
   const binary = atob(base64);
   const buf = new ArrayBuffer(binary.length);
   const view = new Uint8Array(buf);
   for (let i = 0; i < binary.length; i++) {
     view[i] = binary.charCodeAt(i);
   }
-  const pcm16 = new Int16Array(buf);
-  const out = new Float32Array(pcm16.length);
-  for (let i = 0; i < pcm16.length; i++) {
-    out[i] = pcm16[i] / 32768;
-  }
-  return out;
+  return new Int16Array(buf);
 }
 
-// 4) Build log-mel spectrogram
+// 5) Build log-mel spectrogram
 function makeLogMel(
   wav: Float32Array,
   sr = 16000,
@@ -142,45 +131,55 @@ function makeLogMel(
   return logMel;
 }
 
-// 5) Predict one
-export async function predictOneAsync(base64: string): Promise<[string, number]> {
-  if (!interpreter) {
+// 6) Predict from raw PCM data (Int16Array)
+export async function predictFromPCM(pcmData: Int16Array): Promise<[string, number]> {
+  if (!model) {
     await initPitchModel();
   }
 
-  const wav = decodePCM(base64);
+  if (!model) {
+    throw new Error('Failed to initialize model');
+  }
+
+  const wav = convertPCM(pcmData);
   const mel = makeLogMel(wav);
 
-  const inputArray = Array.from(mel);
+  // For react-native-fast-tflite, we need to reshape our 1D array into the expected input shape
+  // Create a Float32Array with the correct size
+  const inputTensor = new Float32Array(1 * 64 * 128 * 1);
+  
+  // Copy data from mel to inputTensor
+  for (let i = 0; i < mel.length; i++) {
+    inputTensor[i] = mel[i];
+  }
 
-  return new Promise<[string, number]>((resolve, reject) => {
-    interpreter!.runModelOnArray(
-      {
-        input: inputArray,
-        inputShape: [1, 64, 128, 1],
-        outputShape: [1, 12],
-        type: 'float32',
-      },
-      (err: any, res: any) => {
-        if (err || !res) {
-          console.error('Prediction failed:', err);
-          reject(err);
-          return;
-        }
+  // Run the model with direct input array
+  // The API expects an array of TypedArrays, not an array of objects
+  const outputs = model.runSync([inputTensor]);
 
-        const CHROMA = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+  // Process the output - the first output is our class probabilities
+  // It's a TypedArray (Float32Array) not an object with a data property
+  const outputArray = Array.from(outputs[0] as Float32Array);
 
-        let best = -Infinity;
-        let idx = 0;
-        for (let i = 0; i < res.length; i++) {
-          if (res[i] > best) {
-            best = res[i];
-            idx = i;
-          }
-        }
+  const CHROMA = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-        resolve([CHROMA[idx], best]);
-      }
-    );
-  });
+  let best = -Infinity;
+  let idx = 0;
+  for (let i = 0; i < outputArray.length; i++) {
+    if (outputArray[i] > best) {
+      best = outputArray[i];
+      idx = i;
+    }
+  }
+
+  return [CHROMA[idx], best];
+}
+
+// 7) Predict from base64 encoded audio data
+export async function predictOneAsync(base64: string): Promise<[string, number]> {
+  // Convert base64 to Int16Array
+  const pcmData = decodePCM(base64);
+  
+  // Use the Int16Array function
+  return predictFromPCM(pcmData);
 }
