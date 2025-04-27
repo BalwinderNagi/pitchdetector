@@ -1,4 +1,3 @@
-// src/components/layout/ThemeContext.js
 import React, { createContext, useState } from 'react';
 
 export const ThemeContext = createContext();
@@ -27,7 +26,7 @@ function ThemeProvider({ children }) {
         isDarkMode,
         toggleTheme,
         proMode,
-        toggleProMode        // ← don’t forget this
+        toggleProMode
       }}
     >
       {children}

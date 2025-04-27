@@ -1,4 +1,4 @@
-// src/components/screens/Screen1.js
+
 import React, { useContext, useState, useEffect, useRef } from 'react';
 import {
   View,
@@ -137,20 +137,17 @@ export const Screen1 = () => {
     setListening(false);
   };
 
-  // keyboard layout
   const whiteKeys   = enumKeys.filter(k => !k.includes('#'));
   const blackKeys   = enumKeys.filter(k => k.includes('#'));
   const screenWidth = Dimensions.get('window').width;
   const keyWidth    = screenWidth / whiteKeys.length;
 
-  // colors
   const whiteBG     = isDarkMode ? '#000' : '#fff';
   const whiteBorder = isDarkMode ? '#fff' : '#000';
   const blackBG     = isDarkMode ? '#fff' : '#000';
 
   return (
     <Theme>
-      {/* ————— piano ————— */}
       <View
         style={[
           styles.keyboardContainer,
@@ -199,15 +196,12 @@ export const Screen1 = () => {
         })}
       </View>
 
-      {/* ————— gauge ————— */}
       <PitchGauge note={currentNote} />
 
-      {/* ————— label above gauge ————— */}
       <Text style={[styles.gaugeLabel, { color: currentTheme.textColor }]}>
         {currentNote || '-'}
       </Text>
 
-      {/* ————— Pro-only controls ————— */}
       {proMode && (
         <>
           <View style={styles.controlsContainer}>
@@ -323,7 +317,6 @@ export const Screen1 = () => {
         </>
       )}
 
-      {/* ————— listen button (always) ————— */}
       <Pressable
         onPress={() =>
           listening ? stopRecording() : startRecording()
@@ -387,10 +380,9 @@ const styles = StyleSheet.create({
   },
   toggleText: { fontSize: 16, fontWeight: '600' },
 
-  // new style for the gauge label
   gaugeLabel: {
     alignSelf:  'center',
-    marginTop:  -40,   // position above gauge
+    marginTop:  -40,
     fontSize:   24,
     fontWeight: '600'
   }

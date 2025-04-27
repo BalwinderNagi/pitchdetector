@@ -1,4 +1,3 @@
-// src/components/screens/Screen3.js
 import React, { useContext } from 'react'
 import { View, StyleSheet, Pressable, Text } from 'react-native'
 import Theme from '../layout/Theme'

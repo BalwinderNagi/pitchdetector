@@ -8,7 +8,7 @@ import modelAsset from '../assets/pitch_detector.tflite';
 
 let interpreter: Tflite | null = null;
 
-function createMelFilterBank(options: {
+function createMelFilterBank(options: { //  Makes a helper that builds and returns a function to convert each spectrum slice into a mel-scaled filterbank vector
   sampleRate: number;
   windowSize: number;
   melBands: number;
@@ -19,10 +19,10 @@ function createMelFilterBank(options: {
   const fftBins = windowSize / 2;
   const hzPerBin = sampleRate / windowSize;
 
-  function hzToMel(hz: number) {
+  function hzToMel(hz: number) { // Converts hz to mel scale
     return 2595 * Math.log10(1 + hz / 700);
   }
-  function melToHz(mel: number) {
+  function melToHz(mel: number) { // Converts mel scale to hz
     return 700 * (10 ** (mel / 2595) - 1);
   }
 
@@ -91,7 +91,7 @@ export async function initPitchModel() {
   }
 }
 
-// 3) Decode Base64 PCM to Float32Array
+// 3) changes Base64 PCM to Float32Array
 function decodePCM(base64: string): Float32Array {
   const binary = atob(base64);
   const buf = new ArrayBuffer(binary.length);
