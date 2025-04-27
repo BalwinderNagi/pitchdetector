@@ -1,4 +1,3 @@
-// src/components/screens/Screen32.js
 import React, { useContext } from 'react';
 import { View, Text, StyleSheet, Switch } from 'react-native';
 import Theme from '../layout/Theme';
@@ -12,7 +11,6 @@ export const Screen32 = () => {
     toggleProMode
   } = useContext(ThemeContext);
 
-  // decide styles based on dark mode + proMode
   const boxBg = isDarkMode
     ? (proMode ? '#000' : '#fff')
     : (proMode ? '#fff' : '#000');
