@@ -8,8 +8,8 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "assetBundlePatterns": [
-      "assets/**",
-      "src/assets/**"
+      "assets/",
+      "src/assets/"
     ],
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -29,6 +29,21 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "plugins": [
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "compileSdkVersion": 34,
+            "targetSdkVersion": 34,
+            "buildToolsVersion": "34.0.0"
+          },
+          "ios": {
+            "deploymentTarget": "15.0"
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "d83259da-fdac-4081-ba9a-2f21a93331a7"
