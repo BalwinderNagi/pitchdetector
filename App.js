@@ -1,25 +1,31 @@
-import React, { useEffect } from 'react'
-import { NavigationContainer } from '@react-navigation/native'
-import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { StatusBar } from 'expo-status-bar'
-import ThemeProvider from './src/components/layout/ThemeContext'
-import MainMenu from './src/components/screens/MainMenu'
-import { Credits } from './src/components/screens/Screen3'
-import Screen1 from './src/components/screens/Screen1'
-import Screen2 from './src/components/screens/Screen2'
-import Screen3 from './src/components/screens/Screen3'
-import Screen31 from './src/components/screens/Screen31'
-import Screen32  from './src/components/screens/Screen32'
-import { initPitchModel } from './src/utils/pitchDetector'
+import 'react-native-gesture-handler';
+import { enableScreens } from 'react-native-screens';
+enableScreens();
 
-const Stack = createNativeStackNavigator()
+import React, { useEffect } from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { StatusBar } from 'expo-status-bar';
+
+import ThemeProvider from './src/components/layout/ThemeContext';
+import MainMenu     from './src/components/screens/MainMenu';
+import { Credits }  from './src/components/screens/Screen3';
+import Screen1      from './src/components/screens/Screen1';
+import Screen2      from './src/components/screens/Screen2';
+import Screen3      from './src/components/screens/Screen3';
+import Screen31     from './src/components/screens/Screen31';
+import Screen32     from './src/components/screens/Screen32';
+
+import { initPitchModel } from './src/utils/pitchDetector';
+
+const Stack = createNativeStackNavigator();
 
 export default function App() {
   useEffect(() => {
     initPitchModel()
       .then(() => console.log('Pitch model loaded'))
-      .catch(err => console.error('Failed to load pitch model:', err))
-  }, [])
+      .catch(err => console.error('Failed to load pitch model:', err));
+  }, []);
 
   return (
     <ThemeProvider>
@@ -64,5 +70,5 @@ export default function App() {
         </Stack.Navigator>
       </NavigationContainer>
     </ThemeProvider>
-  )
+  );
 }
