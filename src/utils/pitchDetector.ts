@@ -8,7 +8,6 @@ import modelAsset from '../assets/pitch_detector.tflite';
 
 let interpreter: Tflite | null = null;
 
-// 1) Helper: create mel filterbank manually
 function createMelFilterBank(options: {
   sampleRate: number;
   windowSize: number;
@@ -52,7 +51,7 @@ function createMelFilterBank(options: {
   };
 }
 
-// 2) Initialize model
+
 export async function initPitchModel() {
   if (interpreter !== null) return;
 

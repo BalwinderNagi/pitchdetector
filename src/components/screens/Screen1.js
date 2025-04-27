@@ -164,7 +164,7 @@ export const Screen1 = () => {
             style={[
               styles.whiteKey,
               {
-                width:        keyWidth,
+                width:           keyWidth,
                 backgroundColor: whiteBG,
                 borderColor:     whiteBorder
               }
@@ -201,6 +201,11 @@ export const Screen1 = () => {
 
       {/* ————— gauge ————— */}
       <PitchGauge note={currentNote} />
+
+      {/* ————— label above gauge ————— */}
+      <Text style={[styles.gaugeLabel, { color: currentTheme.textColor }]}>
+        {currentNote || '-'}
+      </Text>
 
       {/* ————— Pro-only controls ————— */}
       {proMode && (
@@ -375,10 +380,18 @@ const styles = StyleSheet.create({
   ctrlValue:  { marginHorizontal: 12, fontSize: 16, fontWeight:  '500' },
 
   toggleBtn:  {
-    alignSelf:  'center',
-    padding:    12,
+    alignSelf:    'center',
+    padding:      12,
     borderRadius: 6,
-    marginTop:  10
+    marginTop:    10
   },
-  toggleText:{ fontSize: 16, fontWeight: '600' }
+  toggleText: { fontSize: 16, fontWeight: '600' },
+
+  // new style for the gauge label
+  gaugeLabel: {
+    alignSelf:  'center',
+    marginTop:  -40,   // position above gauge
+    fontSize:   24,
+    fontWeight: '600'
+  }
 });
