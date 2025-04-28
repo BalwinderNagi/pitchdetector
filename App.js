@@ -31,7 +31,7 @@ export default function App() {
     <ThemeProvider>
       <NavigationContainer>
         <StatusBar style="auto" />
-        <Stack.Navigator initialRouteName="ScreenDemos">
+        <Stack.Navigator initialRouteName="MainMenu">
           <Stack.Screen
             name="Screen1"
             component={Screen1}

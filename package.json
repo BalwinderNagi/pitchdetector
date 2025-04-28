@@ -11,7 +11,8 @@
   "dependencies": {
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native-stack": "^7.2.0",
-    "@siteed/expo-audio-stream": "^2.2.0",
+    "@siteed/expo-audio-studio": "^2.4.1",
+    "@siteed/expo-audio-ui": "^0.4.0",
     "base-64": "^1.0.0",
     "expo": "~52.0.46",
     "expo-av": "^15.0.2",
