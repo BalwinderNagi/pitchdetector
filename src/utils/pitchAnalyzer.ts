@@ -312,7 +312,6 @@ function yinPitchDetection(buffer: Float32Array, sampleRate: number): number | n
     const y1 = yinBuffer[minTau - 1];
     const y2 = yinBuffer[minTau];
     const y3 = yinBuffer[minTau + 1];
-    
     const a = (y1 + y3 - 2 * y2) / 2;
     const b = (y3 - y1) / 2;
     
