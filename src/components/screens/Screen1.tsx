@@ -20,6 +20,22 @@ import { detectPitch, NotePitch, initAudioProcessor } from '../../utils/pitchAna
 
 const enumKeys = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 
+// Reference note frequencies (A4 = 440Hz standard)
+const NOTE_FREQUENCIES = {
+  'C': 261.63,
+  'C#': 277.18,
+  'D': 293.66,
+  'D#': 311.13,
+  'E': 329.63,
+  'F': 349.23,
+  'F#': 369.99,
+  'G': 392.00,
+  'G#': 415.30,
+  'A': 440.00,
+  'A#': 466.16,
+  'B': 493.88
+};
+
 // Debug mode - set to true for development, false for production
 const SHOW_DEBUG = false;
 
@@ -82,6 +98,11 @@ export const Screen1 = () => {
   const [analyzerReady, setAnalyzerReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [debugData, setDebugData] = useState<any>(null);
+  
+  // Reference note state
+  const [referenceNote, setReferenceNote] = useState<string | null>(null);
+  const [noteDifference, setNoteDifference] = useState<number>(0);
+  const [isAboveReference, setIsAboveReference] = useState<boolean>(false);
 
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -165,6 +186,45 @@ export const Screen1 = () => {
     })();
   }, []);
 
+  // Calculate difference between reference and current note
+  useEffect(() => {
+    if (referenceNote && currentNote && hasStableNote) {
+      // Calculate frequency difference
+      const referenceFreq = NOTE_FREQUENCIES[referenceNote];
+      const noteDistance = calculateNoteDistance(currentNote, referenceNote);
+      
+      setNoteDifference(Math.abs(noteDistance));
+      setIsAboveReference(noteDistance > 0);
+      
+      if (SHOW_DEBUG) {
+        setDebugData(prev => ({
+          ...prev,
+          noteDifference: noteDistance,
+          referenceFreq
+        }));
+      }
+    } else {
+      setNoteDifference(0);
+    }
+  }, [referenceNote, currentNote, hasStableNote, frequency]);
+
+  // Calculate semitone distance between notes
+  const calculateNoteDistance = (note1: string, note2: string): number => {
+    const idx1 = enumKeys.indexOf(note1);
+    const idx2 = enumKeys.indexOf(note2);
+    
+    if (idx1 === -1 || idx2 === -1) return 0;
+    
+    // Calculate distance in semitones
+    let distance = idx1 - idx2;
+    
+    // Wrap around the octave if needed
+    if (distance > 6) distance = distance - 12;
+    if (distance < -6) distance = distance + 12;
+    
+    return distance;
+  };
+
   // Metronome setup
   useEffect(() => {
     clearInterval(intervalRef.current);
@@ -186,6 +246,34 @@ export const Screen1 = () => {
       }
     };
   }, [metroOn, bpm]);
+
+  // Handle keyboard note selection
+  const handleKeyPress = (note: string) => {
+    console.log(`Pressed ${note}`);
+    setReferenceNote(note);
+    
+    if (SHOW_DEBUG) {
+      setDebugData(prev => ({
+        ...prev,
+        selectedReference: note,
+        referenceFreq: NOTE_FREQUENCIES[note]
+      }));
+    }
+  };
+
+  // Clear reference note
+  const clearReferenceNote = () => {
+    setReferenceNote(null);
+    setNoteDifference(0);
+    
+    if (SHOW_DEBUG) {
+      setDebugData(prev => ({
+        ...prev,
+        selectedReference: null,
+        noteDifference: null
+      }));
+    }
+  };
 
   // Fast base64 to PCM conversion for audio processing
   const fastBase64ToPCM = useCallback((base64Data: string): Int16Array => {
@@ -534,6 +622,12 @@ export const Screen1 = () => {
   const whiteBorder = isDarkMode ? '#fff' : '#000';
   const blackBG = isDarkMode ? '#fff' : '#000';
 
+  // Get color for the reference note display
+  const getReferenceColor = () => {
+    if (!referenceNote || !hasStableNote) return currentTheme.textColor;
+    return isAboveReference ? '#e74c3c' : '#2ecc71';
+  };
+
   return (
     <Theme>
       <View
@@ -545,14 +639,15 @@ export const Screen1 = () => {
         {whiteKeys.map((note, i) => (
           <Pressable
             key={note + i}
-            onPress={() => console.log(`Pressed ${note}`)}
+            onPress={() => handleKeyPress(note)}
             style={[
               styles.whiteKey,
               {
                 width: keyWidth,
                 backgroundColor: whiteBG,
                 borderColor: whiteBorder
-              }
+              },
+              note === referenceNote && styles.selectedKey
             ]}
           >
             <Text
@@ -570,26 +665,32 @@ export const Screen1 = () => {
           return (
             <Pressable
               key={note + idx}
-              onPress={() => console.log(`Pressed ${note}`)}
+              onPress={() => handleKeyPress(note)}
               style={[
                 styles.blackKey,
                 {
                   left: keyWidth * (pos + 1) - keyWidth * 0.25,
                   width: keyWidth * 0.5,
                   backgroundColor: blackBG
-                }
+                },
+                note === referenceNote && styles.selectedBlackKey
               ]}
             />
           );
         })}
       </View>
 
+      {/* Pass cents and reference note info to PitchGauge */}
       <PitchGauge 
         note={currentNote} 
-        cents={cents} 
-        hasStableNote={hasStableNote} 
+        cents={cents}
+        hasStableNote={hasStableNote}
+        referenceNote={referenceNote}
+        noteDifference={noteDifference * 50} // Scale for display
+        isAboveReference={isAboveReference}
       />
 
+      {/* Current detected note display */}
       <Text style={[styles.gaugeLabel, { color: currentTheme.textColor }]}>
         {currentNote || '-'}
         {frequency && hasStableNote && (
@@ -598,6 +699,32 @@ export const Screen1 = () => {
           </Text>
         )}
       </Text>
+      
+      {/* Reference note display */}
+      {referenceNote && (
+        <View style={styles.referenceContainer}>
+          <Text style={styles.referenceLabel}>Reference Note:</Text>
+          <Text style={[
+            styles.referenceNote,
+            { color: getReferenceColor() }
+          ]}>
+            {referenceNote}
+            {hasStableNote && currentNote && (
+              <Text style={[styles.referenceDifference, { color: getReferenceColor() }]}>
+                {` (${isAboveReference ? '+' : '-'}${noteDifference} semitones)`}
+              </Text>
+            )}
+          </Text>
+          <Pressable
+            onPress={clearReferenceNote}
+            style={[styles.clearButton, { backgroundColor: currentTheme.textColor }]}
+          >
+            <Text style={[styles.clearButtonText, { color: currentTheme.backgroundColor }]}>
+              Clear
+            </Text>
+          </Pressable>
+        </View>
+      )}
 
       {/* Debug panel */}
       <DebugDisplay 
@@ -761,9 +888,63 @@ const styles = StyleSheet.create({
     height: 200,
     alignSelf: 'center'
   },
-  whiteKey: { borderWidth: 1, height: '100%', justifyContent: 'flex-end' },
-  blackKey: { position: 'absolute', height: '60%', borderRadius: 3, zIndex: 1 },
-  whiteLabel: { alignSelf: 'center', marginBottom: 8, fontSize: 12 },
+  whiteKey: { 
+    borderWidth: 1, 
+    height: '100%', 
+    justifyContent: 'flex-end' 
+  },
+  blackKey: { 
+    position: 'absolute', 
+    height: '60%', 
+    borderRadius: 3, 
+    zIndex: 1 
+  },
+  selectedKey: {
+    backgroundColor: '#e3f2fd',
+    borderColor: '#2196f3',
+    borderWidth: 2
+  },
+  selectedBlackKey: {
+    backgroundColor: '#2196f3',
+    borderColor: '#64b5f6',
+    borderWidth: 1
+  },
+  whiteLabel: { 
+    alignSelf: 'center', 
+    marginBottom: 8, 
+    fontSize: 12 
+  },
+
+  // Reference note display
+  referenceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 10,
+    marginBottom: 5
+  },
+  referenceLabel: {
+    fontSize: 14,
+    marginRight: 6
+  },
+  referenceNote: {
+    fontSize: 18,
+    fontWeight: '600'
+  },
+  referenceDifference: {
+    fontSize: 14,
+    fontWeight: '400'
+  },
+  clearButton: {
+    marginLeft: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 4
+  },
+  clearButtonText: {
+    fontSize: 12,
+    fontWeight: '600'
+  },
 
   controlsContainer: {
     flexDirection: 'row',
